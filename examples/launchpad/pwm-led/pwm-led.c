@@ -38,7 +38,7 @@
  *         Marcus Lunden <marcus.lunden@gmail.com>
  */
 
-#include <stdio.h>
+//#include <stdio.h>
 #include "contiki.h"
 #include "dev/leds.h"
 #include "dev/pwm.h"
@@ -76,10 +76,10 @@ AUTOSTART_PROCESSES(&button_process, &pwmled_process);
 
 PROCESS_THREAD(pwmled_process, ev, data)
 {
+  static struct etimer etr;
   PROCESS_POLLHANDLER();
   PROCESS_EXITHANDLER(pwm_all_off(); etimer_stop(&etr););
   PROCESS_BEGIN();
-  static struct etimer etr;
   static uint8_t i = 1;     /* counter */
   static uint8_t up = 1;    /* counting up or down? */
 
