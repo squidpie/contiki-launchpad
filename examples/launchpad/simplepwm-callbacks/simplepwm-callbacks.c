@@ -30,22 +30,25 @@
 
 /**
  * \file
- *         Simple-PWM example application,
- *          Demonstrates using the simple_pwm API to eg dim LED.
+ *         Simple hack to make simplepwm invoke a callback instead of directly
+ *         manipulate the LED. This way we can do more, such as instead change
+ *         a display.
  * \author
  *         Marcus Lunden <marcus.lunden@gmail.com>
  */
+
+/* TODO:
+  verify that the on_cb is actually the cb being invoked when /on/ and not vice versa
+      ie if DC=80% then on_cb should be invoked just before the 80% period starts  
+  
+   */
+
 
 #include <stdio.h>
 #include "contiki.h"
 #include "dev/leds.h"
 #include "dev/button.h"
 #include "simple-pwm.h"
-
-/* pins I want to use for PWM (only one is used) at a time with this */
-#define LEDRED_PIN       (0)   // P1.0
-#define LEDGRN_PIN       (6)   // P1.6
-#define LEDBIG_PIN       (7)   // P1.7
 
 /* the PWM duty cycle will step back and forth between these limits, with this step */
 #define PWM_MIN           0
@@ -58,6 +61,20 @@
 PROCESS(pwmled_process, "PWM LED process");
 AUTOSTART_PROCESSES(&pwmled_process);
 /*---------------------------------------------------------------------------*/ 
+#define TEST_PORT(type)          P1##type
+#define pin                      6
+void
+pwm_on_cb(void)
+{
+  TEST_PORT(OUT) |= (1 << pin);
+}
+/*---------------------------------------------------------------------------*/
+void
+pwm_off_cb(void)
+{
+  TEST_PORT(OUT) &= ~(1 << pin);
+}
+/*--------------------------------------------------------------------------*/
 /* PWM process; finds and sets the PWM. */
 static struct etimer etr;
 static uint8_t i = 1;     /* counter */
@@ -66,10 +83,37 @@ static uint8_t up = 1;    /* counting up or down? */
 PROCESS_THREAD(pwmled_process, ev, data)
 {
   PROCESS_POLLHANDLER();
-  PROCESS_EXITHANDLER(simple_pwm_off(););
+  PROCESS_EXITHANDLER();
   PROCESS_BEGIN();
 
-  simple_pwm_confpin(LEDRED_PIN);
+  leds_off(LEDS_ALL);
+
+  /* no need to do simplepwm_confpin() as it no longer changes those. */
+  TEST_PORT(IE) &= ~(1 << pin);
+  TEST_PORT(DIR) |= (1 << pin);
+  TEST_PORT(OUT) |= (1 << pin);
+  TEST_PORT(SEL) &= ~(1 << pin);
+  TEST_PORT(SEL2) &= ~(1 << pin);
+
+#if 0
+  while(1) {
+    simple_pwm_on(20);
+    etimer_set(&etr, CLOCK_SECOND/2);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&etr));
+    simple_pwm_on(40);
+    etimer_set(&etr, CLOCK_SECOND/2);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&etr));
+    simple_pwm_on(60);
+    etimer_set(&etr, CLOCK_SECOND/2);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&etr));
+    simple_pwm_on(80);
+    etimer_set(&etr, CLOCK_SECOND/2);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&etr));
+    simple_pwm_on(100);
+    etimer_set(&etr, CLOCK_SECOND/2);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&etr));
+  }
+#endif /* if 0; commented out code */
 
   while(1) {
     simple_pwm_on(i);

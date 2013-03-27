@@ -12,7 +12,7 @@ TARGET=launchpad
 endif
 
 # Change this to the main file of your project (NB without file ending)
-PROJECT = test-hpdl
+PROJECT = hpdl1414-clock
 
 # if you have more than one source file to include, list them here
 #PROJECT_SOURCEFILES += button.c
@@ -22,6 +22,8 @@ PROJECT = test-hpdl
 
 # any overridden Contiki source file (in this project) is listed here
 #CONTIKI_SOURCEFILES += 
+# for changed simplepwm:
+CONTIKI_SOURCEFILES += rtimer-arch.c
 
 CFLAGS += -Wl,--oihex
 

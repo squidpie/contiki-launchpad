@@ -12,16 +12,16 @@ TARGET=launchpad
 endif
 
 # Change this to the main file of your project (NB without file ending)
-PROJECT = test-hpdl
+PROJECT = simplepwm-callbacks
 
 # if you have more than one source file to include, list them here
-#PROJECT_SOURCEFILES += button.c
+#PROJECT_SOURCEFILES += example.c other.c
 
 # if files are in several folders, list them here
 #PROJECT_FOLDERS     += ./example ./example/deep/deeper
 
 # any overridden Contiki source file (in this project) is listed here
-#CONTIKI_SOURCEFILES += 
+CONTIKI_SOURCEFILES += rtimer-arch.c
 
 CFLAGS += -Wl,--oihex
 
